@@ -48,22 +48,25 @@ python src/behavior_eval/evaluation/action_sequencing/scripts/evaluate_results.p
 
 ---
 
-
 ## 🔁 Stepwise Planning
 
 In **stepwise planning**, the agent 🤖 interacts with the environment 🌍 for *n* steps and *m* trials to finish the task.  
-At each step, the agent selects and executes an action \( a_{ij} \), where \( i \in m \) and \( j \in n \), which is processed by the simulator 🎮 and returns an observation \( o_{ij} \), along with the updated environment state \( \mathcal{G}_{ij} \).
+At each step, the agent selects and executes an action $a_{ij}$, where $i \in m$ and $j \in n$, which is processed by the simulator 🎮 and returns an observation $o_{ij}$, along with the updated environment state $\mathcal{G}_{ij}$.
 
-This interaction continues for a (pre-defined) number of steps, constituting a trajectory  
-\( \tau_i = \{ a_{11}, o_{11}, a_{12}, o_{12}, \ldots \} \).  
+This interaction continues for a (pre-defined) number of steps, constituting a trajectory:
 
-At the end of each trial, a critic 🧠 evaluates the (so-far generated) plan \( \mathcal{P}_i \) and provides feedback \( f_i \).  
+$$
+\tau_i = \{ a_{11}, o_{11}, a_{12}, o_{12}, \ldots \}
+$$
+
+At the end of each trial, a critic 🧠 evaluates the (so-far generated) plan $\mathcal{P}_i$ and provides feedback $f_i$.  
 This feedback guides the agent in refining its strategy or decision-making process for future trials.
 
 The process continues until the agent generates the **“Done”** action or exhausts all trials.  
-If the plan is executable, the updated environment state \( \mathcal{G}^\* \) is passed on for evaluation.
+If the plan is executable, the updated environment state $\mathcal{G}^\*$ is passed on for evaluation.
 
 ✨ This strategy suits **iterative planning**, i.e., where interactions occur between the agent and the simulator/environment.
+
 
 ⚙️ Key Arguments
 
