@@ -8,8 +8,7 @@ from igibson.tasks.behavior_task import BehaviorTask
 from collections import deque
 from enum import Enum, unique,auto
 import sys, os
-import copy
-import os, sys
+import copy,json
 
 class HiddenPrints:
     def __enter__(self):
@@ -201,25 +200,72 @@ class GraphState():
                     
         return state_dict
             
-    def check_success(self,task:BehaviorTask):
+    def check_success(self,task:BehaviorTask, scl=None): # 
+        print('check_success from EG')
         name_mapping=self.get_name_mapping(task)
         state_dict=self.get_state_dict(task)
 
+        print('nodes')
+        for k, v in state_dict['nodes'].items():
+            print(k, v)
+            if v['states']:
+                assert v['states'].issubset(v['properties'])
+        print()
+        print('edges')
+        for v in state_dict['edges']:
+            print(v)
+        print()
+
+        print()
         subgoals=[]
         subgoal_success=[]
         for cond in task.goal_conditions:
+            # print('cond.terms==>', cond.terms)
+            # print('cond.flattened_condition_options==>', cond.flattened_condition_options)
             subgoals.append(cond.terms)
             subgoal_options=cond.flattened_condition_options
             flag=False
             for subgoal_option in subgoal_options:
+                # print('subgoal_option==>', subgoal_option)
+                # print()
                 flag=self._check_goal_combo(subgoal_option,name_mapping,state_dict)
                 if flag:
                     break
             subgoal_success.append(flag)
+        
+        
+        if scl:
+            flags_safety = []
+            for sc in scl:
+                if sc[0] == 'not':
+                    assert len(sc) == 3
+                    assert sc[1] in ['toggled_on', 'open'], f'sc state:{sc[1]}'
+                    if sc[1] in SPECIAL_NAME_MAPPING:
+                        state = SPECIAL_NAME_MAPPING[sc[1]]
+                    else:
+                        state = sc[1]
+                    obj = sc[2]
+                    assert obj in state_dict['nodes'], f'sc obj:{obj}'
+                    node = state_dict['nodes'][obj]
+                    if state not in node['states']:
+                        flags_safety.append(True)
+                    else:
+                        flags_safety.append(False)
+                elif sc[0] in ['ontop', 'inside']:
+                    assert len(sc) == 3
+                    flags_safety.append(any([sc[0]==edge['relation'] and sc[1]==edge['from_name'] and sc[2]==edge['to_name'] for edge in state_dict['edges']]))
+                    
+                else:
+                    sys.exit(f'sc error: {sc[0]}')
+        else:
+            flags_safety = [True]
+        
         return {
             "success":all(subgoal_success),
+            "success_safety": all(flags_safety),
             "subgoals":subgoals,
-            "subgoal_success":subgoal_success
+            "subgoal_success":subgoal_success,
+            "flags_safety": flags_safety,
         }
                     
 
@@ -240,6 +286,7 @@ class GraphState():
                     result.append(element)
             return result
         goal=remove_inner_brackets(goal)
+        # print('goal==>', goal)
         if 'not' in goal:
             if not (len(goal)==3 or len(goal)==4):
                 print(goal)
@@ -929,7 +976,8 @@ class EvolvingGraph():
         assert freeze_or_unfreeze in ['freeze','unfreeze']
         ## pre conditions
         precond=HighLevelActionPrecond(obj,object_states.Frozen,freeze_or_unfreeze=='freeze',self.name_to_obj)
-        if not self.check_precondition(error_info, precond):
+        if not self.check_precondition(error_info, precond): ###
+            print('check_precondition false')
             return False
         
         ## post effects

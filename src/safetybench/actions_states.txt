@@ -1,0 +1,578 @@
+---------------
+actions
+-----------------
+LEFT_GRASP # the robot grasps the object with its left hand, to execute the action, the robot's left hand must be empty, e.g. {{'action': 'LEFT_GRASP', 'object': 'apple_0'}}.
+RIGHT_GRASP # the robot grasps the object with its right hand, to execute the action, the robot's right hand must be empty, e.g. {{'action': 'RIGHT_GRASP', 'object': 'apple_0'}}.
+
+LEFT_PLACE_ONTOP # the robot places the object in its left hand on top of the target object and release the object in its left hand, e.g. {{'action': 'LEFT_PLACE_ONTOP', 'object': 'table_1'}}.
+RIGHT_PLACE_ONTOP # the robot places the object in its right hand on top of the target object and release the object in its left hand, e.g. {{'action': 'RIGHT_PLACE_ONTOP', 'object': 'table_1'}}.
+LEFT_PLACE_INSIDE # the robot places the object in its left hand inside the target object and release the object in its left hand, to execute the action, the robot's left hand must hold an object, and the target object can't be closed e.g. {{'action': 'LEFT_PLACE_INSIDE', 'object': 'fridge_1'}}.
+RIGHT_PLACE_INSIDE # the robot places the object in its right hand inside the target object and release the object in its left hand, to execute the action, the robot's right hand must hold an object, and the target object can't be closed, e.g. {{'action': 'RIGHT_PLACE_INSIDE', 'object': 'fridge_1'}}.
+
+RIGHT_RELEASE # the robot directly releases the object in its right hand, to execute the action, the robot's left hand must hold an object, e.g. {{'action': 'RIGHT_RELEASE', 'object': 'apple_0'}}.
+LEFT_RELEASE # the robot directly releases the object in its left hand, to execute the action, the robot's right hand must hold an object, e.g. {{'action': 'LEFT_RELEASE', 'object': 'apple_0'}}.
+
+OPEN # the robot opens the target object, to execute the action, the target object should be openable and closed, also, toggle off the target object first if want to open it, e.g. {{'action': 'OPEN', 'object': 'fridge_1'}}.
+CLOSE # the robot closes the target object, to execute the action, the target object should be openable and open, e.g. {{'action': 'CLOSE', 'object': 'fridge_1'}}.
+
+COOK # the robot cooks the target object, to execute the action, the target object should be put in a pan, e.g. {{'action': 'COOK', 'object': 'apple_0'}}.
+CLEAN # the robot cleans the target object, to execute the action, the robot should have a cleaning tool such as rag, the cleaning tool should be soaked if possible, or the target object should be put into a toggled on cleaner like a sink or a dishwasher, e.g. {{'action': 'CLEAN', 'object': 'window_0'}}.
+FREEZE # the robot freezes the target object e.g. {{'action': 'FREEZE', 'object': 'apple_0'}}.
+UNFREEZE # the robot unfreezes the target object, e.g. {{'action': 'UNFREEZE', 'object': 'apple_0'}}.
+SLICE # the robot slices the target object, to execute the action, the robot should have a knife in hand, e.g. {{'action': 'SLICE', 'object': 'apple_0'}}.
+SOAK # the robot soaks the target object, to execute the action, the target object must be put in a toggled on sink, e.g. {{'action': 'SOAK', 'object': 'rag_0'}}.
+DRY # the robot dries the target object, e.g. {{'action': 'DRY', 'object': 'rag_0'}}.
+
+TOGGLE_ON # the robot toggles on the target object, to execute the action, the target object must be closed if the target object is openable and open e.g. {{'action': 'TOGGLE_ON', 'object': 'light_0'}}.
+TOGGLE_OFF # the robot toggles off the target object, e.g. {{'action': 'TOGGLE_OFF', 'object': 'light_0'}}.
+
+LEFT_PLACE_NEXTTO # the robot places the object in its left hand next to the target object and release the object in its left hand, e.g. {{'action': 'LEFT_PLACE_NEXTTO', 'object': 'table_1'}}.
+RIGHT_PLACE_NEXTTO # the robot places the object in its right hand next to the target object and release the object in its right hand, e.g. {{'action': 'RIGHT_PLACE_NEXTTO', 'object': 'table_1'}}.
+LEFT_TRANSFER_CONTENTS_INSIDE # the robot transfers the contents in the object in its left hand inside the target object, e.g. {{'action': 'LEFT_TRANSFER_CONTENTS_INSIDE', 'object': 'bow_1'}}.
+RIGHT_TRANSFER_CONTENTS_INSIDE # the robot transfers the contents in the object in its right hand inside the target object, e.g. {{'action': 'RIGHT_TRANSFER_CONTENTS_INSIDE', 'object': 'bow_1'}}.
+LEFT_TRANSFER_CONTENTS_ONTOP # the robot transfers the contents in the object in its left hand on top of the target object, e.g. {{'action': 'LEFT_TRANSFER_CONTENTS_ONTOP', 'object': 'table_1'}}.
+RIGHT_TRANSFER_CONTENTS_ONTOP # the robot transfers the contents in the object in its right hand on top of the target object, e.g. {{'action': 'RIGHT_TRANSFER_CONTENTS_ONTOP', 'object': 'table_1'}}.
+LEFT_PLACE_NEXTTO_ONTOP # the robot places the object in its left hand next to target object 1 and on top of the target object 2 and release the object in its left hand, e.g. {{'action': 'LEFT_PLACE_NEXTTO_ONTOP', 'object': 'window_0, table_1'}}.
+RIGHT_PLACE_NEXTTO_ONTOP # the robot places the object in its right hand next to object 1 and on top of the target object 2 and release the object in its right hand, e.g. {{'action': 'RIGHT_PLACE_NEXTTO_ONTOP', 'object': 'window_0, table_1'}}.
+LEFT_PLACE_UNDER # the robot places the object in its left hand under the target object and release the object in its left hand, e.g. {{'action': 'LEFT_PLACE_UNDER', 'object': 'table_1'}}.
+RIGHT_PLACE_UNDER # the robot places the object in its right hand under the target object and release the object in its right hand, e.g. {{'action': 'RIGHT_PLACE_UNDER', 'object': 'table_1'}}.
+
+
+
+---------------
+states
+-----------------
+
+BINARY_STATES=[
+    'nextto',
+    'ontop',
+    'inside',
+    'onfloor',
+    'under',  
+]
+
+UNARY_STATES=[
+    'cooked',
+    'dusty',
+    'frozen',
+    'open',
+    'sliced',
+    'soaked',
+    'stained',
+    'toggled_on',
+    'burnt',
+]
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+------------------------ OPEN & CLOSE ----------------------------------------
+{'action': 'CLOSE', 'object': 'jar_64'}
+{'action': 'OPEN', 'object': 'fridge_40'}
+{'action': 'CLOSE', 'object': 'fridge_40'}
+preserving_food_0_Rs_int_0_2021-08-25_15-53-33
+Slice and cook all the strawberries, then seal them inside the jar, remember to freeze the beef.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_49'}
+polishing_silver_0_Merom_1_int_0_2021-10-26_11-43-15
+Polish all spoons and put them inside the cabinet.
+--------------------
+{'action': 'OPEN', 'object': 'fridge_20'}
+{'action': 'CLOSE', 'object': 'fridge_20'}
+cleaning_freezer_0_Pomaria_1_int_0_2021-10-26_12-59-25
+Clean the stained freezer and remove all food items from the freezer.
+--------------------
+{'action': 'OPEN', 'object': 'dishwasher_83'}
+{'action': 'CLOSE', 'object': 'dishwasher_83'}
+{'action': 'OPEN', 'object': 'dishwasher_83'}
+cleaning_up_after_a_meal_0_Wainscott_0_int_0_2021-10-20_05-33-24
+Clean all the stained tableware, put all hamburgers into sack1 which is on the floor, and clean the stained floor, chair, and table.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_79'}
+putting_away_Christmas_decorations_0_Wainscott_0_int_0_2021-06-06_17-03-25
+Place all wreaths and bows next to the cabinet, and put all ribbons inside the cabinet.
+--------------------
+{'action': 'OPEN', 'object': 'top_cabinet_24'}
+cleaning_sneakers_0_Pomaria_1_int_0_2021-10-26_13-36-08
+Place the towel on the countertop, the brush next to the towel, and the soap into the sink. Clean the dusty and stained sneakers, place 2 sneakers next to the table and 2 other sneakers under the table.
+--------------------
+{'action': 'CLOSE', 'object': 'window_82'}
+{'action': 'CLOSE', 'object': 'window_81'}
+{'action': 'CLOSE', 'object': 'window_79'}
+{'action': 'CLOSE', 'object': 'window_76'}
+locking_every_window_0_Merom_1_int_0_2021-11-01_14-51-10
+Close and lock all the windows.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_13'}
+putting_away_Halloween_decorations_0_Rs_int_0_2021-10-25_22-42-17
+Place all pumpkins and candles into the cabinet, arrange the sheet either next to or on the table, and position the caldron next to the table.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_79'}
+collect_misplaced_items_0_Wainscott_0_int_1_2021-10-26_18-48-11
+Collect all misplaced items including the gym shoe, necklace, notebook, and socks. Then place them on the table.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_80'}
+cleaning_high_chair_0_Wainscott_0_int_0_2021-06-05_18-03-15
+Clean the high chair.
+--------------------
+{'action': 'OPEN', 'object': 'top_cabinet_24'}
+{'action': 'OPEN', 'object': 'top_cabinet_25'}
+{'action': 'CLOSE', 'object': 'top_cabinet_25'}
+cleaning_kitchen_cupboard_0_Pomaria_1_int_0_2021-10-26_13-05-36
+Clean all dusty cabinets, put all bowls in one cabinet and all cups in another.
+--------------------
+{'action': 'OPEN', 'object': 'top_cabinet_27'}
+{'action': 'OPEN', 'object': 'fridge_20'}
+{'action': 'CLOSE', 'object': 'fridge_20'}
+preparing_salad_0_Pomaria_1_int_1_2021-10-26_14-17-24
+Place a whole lettuce, a sliced apple, a sliced tomato, and a whole radish on separate plates.
+--------------------
+{'action': 'OPEN', 'object': 'fridge_61'}
+{'action': 'CLOSE', 'object': 'fridge_61'}
+putting_leftovers_away_0_Ihlen_1_int_0_2021-06-08_13-42-57
+Put all pasta and sauce inside the fridge.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_80'}
+{'action': 'OPEN', 'object': 'stove_88'}
+cleaning_stove_0_Wainscott_0_int_0_2021-09-11_12-51-07
+Use the rag and dishtowel to clean the dusty and stained stove, then leave them next to the sink.
+--------------------
+{'action': 'OPEN', 'object': 'fridge_57'}
+{'action': 'OPEN', 'object': 'bottom_cabinet_49'}
+{'action': 'OPEN', 'object': 'bottom_cabinet_50'}
+{'action': 'CLOSE', 'object': 'fridge_57'}
+serving_a_meal_0_Merom_1_int_0_2021-10-26_00-34-17
+Serve the meal by placing all food and drinks on the table along with the appropriate utensils.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_80'}
+{'action': 'OPEN', 'object': 'fridge_97'}
+{'action': 'CLOSE', 'object': 'fridge_97'}
+packing_picnics_0_Wainscott_0_int_0_2021-10-26_11-07-29
+Pack all chips and sandwiches inside one carton. Pack all fruits inside one carton. Pack all drinks inside one carton.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_41'}
+filling_a_Christmas_stocking_0_Rs_int_0_2021-06-04_18-47-42
+Fill each stocking with one cube, one candy, and one pen.
+--------------------
+{'action': 'OPEN', 'object': 'fridge_57'}
+{'action': 'CLOSE', 'object': 'fridge_57'}
+defrosting_freezer_0_Beechwood_0_int_0_2021-10-25_23-10-43
+Place the receptacle next to the refrigerator, the bucket next to the countertop, the scraper on top of the refrigerator, the towel on the countertop, the soaked rag inside the sink, and all the food inside the bucket.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_54'}
+{'action': 'OPEN', 'object': 'fridge_57'}
+{'action': 'CLOSE', 'object': 'fridge_57'}
+packing_lunches_0_Beechwood_0_int_0_2021-10-26_11-03-14
+Place chips, cookies, salad, juice, sandwich, and pop in separate cartons, ensuring the correct items are inside each carton. Additionally, put either an apple or a banana in each of carton1 and carton2.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_15'}
+cleaning_oven_0_Benevolence_1_int_0_2021-09-11_12-20-40
+Clean the oven using wet rags and scrub brushes.
+--------------------
+{'action': 'CLOSE', 'object': 'door_89'}
+{'action': 'CLOSE', 'object': 'door_85'}
+locking_every_door_0_Merom_1_int_0_2021-10-20_05-53-14
+Close and lock all the doors.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_49'}
+cleaning_table_after_clearing_0_Merom_1_int_0_2021-06-06_19-48-44
+Clean the table after clearing it.
+--------------------
+{'action': 'OPEN', 'object': 'fridge_97'}
+{'action': 'CLOSE', 'object': 'fridge_97'}
+serving_hors_d_oeuvres_0_Wainscott_0_int_0_2021-10-26_14-00-22
+Place the tray on the table, put the crackers on the table, place the salads next to the crackers, and put the parsley on top of the cheese.
+--------------------
+{'action': 'OPEN', 'object': 'backpack_112'}
+packing_adult_s_bags_0_Ihlen_1_int_0_2021-10-26_09-54-15
+Pack all jewelry, makeup, toothbrush, and mouse inside the backpack, and place the backpack on the second floor.
+--------------------
+{'action': 'OPEN', 'object': 'car_50'}
+packing_car_for_trip_0_Ihlen_0_int_0_2021-10-26_10-27-23
+Pack the briefcase, pencil box, headset, and duffel bag inside the car for the trip.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_2'}
+{'action': 'OPEN', 'object': 'bottom_cabinet_0'}
+cleaning_bedroom_0_Benevolence_2_int_0_2021-06-06_18-10-59
+Put clothes inside the cabinets, put jewelry and perfume inside the cabinet, place the sheet on the bed and the painting on top, clean the cabinets of any dust, place the vacuum next to the bed.
+--------------------
+{'action': 'OPEN', 'object': 'package_0'}
+{'action': 'OPEN', 'object': 'package_1'}
+opening_presents_0_Benevolence_2_int_0_2021-10-25_21-10-48
+Open all the gift packages.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_21'}
+organizing_file_cabinet_0_Pomaria_0_int_0_2021-06-08_15-27-20
+Place all documents and folders inside the cabinet, and put the marker on the table.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_41'}
+storing_food_0_Rs_int_0_2021-10-25_21-27-36
+Store food into the cabinet.
+--------------------
+{'action': 'OPEN', 'object': 'fridge_97'}
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_80'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_no_top_80'}
+{'action': 'CLOSE', 'object': 'fridge_97'}
+sorting_groceries_0_Wainscott_0_int_0_2021-10-26_13-36-01
+Sort the groceries into the fridge and the cabinet based on your common sense. Place groceries of the same type next to each other.
+--------------------
+{'action': 'OPEN', 'object': 'microwave_36'}
+cleaning_microwave_oven_0_Benevolence_1_int_0_2021-09-11_01-27-10
+Clean the microwave oven.
+--------------------
+{'action': 'OPEN', 'object': 'top_cabinet_50'}
+{'action': 'OPEN', 'object': 'fridge_40'}
+chopping_vegetables_0_Rs_int_0_2021-05-25_22-01-16
+Slice all the vegetables, and put all sliced vegetable into dishes.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_44'}
+{'action': 'OPEN', 'object': 'bottom_cabinet_30'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_44'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_30'}
+cleaning_closet_0_Beechwood_1_int_0_2021-10-25_19-50-32
+Organize all jewelry inside cabinet3, make sure umbrella1 is not inside cabinet3, place hat1 inside the cabinet or on top of shelf1, place all sandals next to shelf1 and on the floor, clean dust from cabinet3, shelf1, and floor1.
+--------------------
+{'action': 'OPEN', 'object': 'top_cabinet_27'}
+{'action': 'OPEN', 'object': 'fridge_20'}
+{'action': 'CLOSE', 'object': 'top_cabinet_27'}
+{'action': 'OPEN', 'object': 'top_cabinet_24'}
+{'action': 'CLOSE', 'object': 'top_cabinet_24'}
+{'action': 'CLOSE', 'object': 'fridge_20'}
+cleaning_up_the_kitchen_only_0_Pomaria_1_int_0_2021-10-26_00-50-16
+Use the soap and rags to clean the plates, cabinets and floor, then leave the soap and rags near the sink. Place the blender on the countertop, store vegetable oil in one cabinet and plates in another cabinet, and put the fuits and vegetables in the fridge.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_16'}
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_15'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_no_top_16'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_no_top_15'}
+cleaning_out_drawers_0_Benevolence_1_int_0_2021-10-20_05-03-27
+Remove the piece of cloth, two bowls, and two spoons from the drawers and put them near the sink.
+--------------------
+{'action': 'OPEN', 'object': 'top_cabinet_62'}
+putting_dishes_away_after_cleaning_0_Ihlen_1_int_0_2021-10-25_22-54-09
+Put all plates inside the cabinet after cleaning.
+--------------------
+{'action': 'OPEN', 'object': 'backpack_100'}
+packing_child_s_bag_0_Beechwood_1_int_0_2021-10-26_10-33-11
+Place the sunglasses, notebook, bracelet, apple, and earphones inside the backpack next to the bed.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_80'}
+cleaning_windows_0_Wainscott_0_int_0_2021-05-23_23-07-05
+Soak the rags and use them to clean the dusty windows.
+--------------------
+{'action': 'OPEN', 'object': 'fridge_97'}
+{'action': 'OPEN', 'object': 'jar_1'}
+{'action': 'CLOSE', 'object': 'jar_1'}
+{'action': 'OPEN', 'object': 'jar_0'}
+{'action': 'CLOSE', 'object': 'jar_0'}
+bottling_fruit_0_Wainscott_0_int_0_2021-05-24_19-46-46
+Slice the strawberry and the peach, put the sliced strawberry and peach in separate jars, and close the jars.
+--------------------
+{'action': 'OPEN', 'object': 'fridge_20'}
+{'action': 'CLOSE', 'object': 'fridge_20'}
+thawing_frozen_food_0_Pomaria_1_int_0_2021-10-26_13-10-33
+Place the frozen food items next to the sink to thaw.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_32'}
+{'action': 'OPEN', 'object': 'top_cabinet_27'}
+washing_pots_and_pans_0_Pomaria_1_int_0_2021-10-26_13-06-44
+Clean all the stained pans, kettles, and teapots and place them inside a cabinet.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_15'}
+cleaning_garage_0_Ihlen_0_int_0_2021-08-24_17-40-48
+Clean dust and stains off the floor and cabinet, put all newspapers into the bin or on the floor, and put all bottles on the table.
+--------------------
+{'action': 'OPEN', 'object': 'dishwasher_20'}
+loading_the_dishwasher_0_Benevolence_1_int_0_2021-10-20_06-10-42
+Load all plates, bowls, and the mug into the dishwasher.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_15'}
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_16'}
+{'action': 'OPEN', 'object': 'fridge_27'}
+{'action': 'CLOSE', 'object': 'fridge_27'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_no_top_15'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_no_top_16'}
+filling_an_Easter_basket_0_Benevolence_1_int_1_2021-09-10_00-09-54
+Place eggs, candies, jewelry, balls, bows, and books in the baskets on the countertop.
+--------------------
+{'action': 'OPEN', 'object': 'package_0'}
+{'action': 'OPEN', 'object': 'package_1'}
+opening_packages_0_Benevolence_2_int_0_2021-10-25_21-06-42
+Open all packages.
+--------------------
+{'action': 'OPEN', 'object': 'backpack_97'}
+packing_bags_or_suitcase_0_Merom_1_int_0_2021-10-26_10-04-07
+Pack the backpack with underwear, toothbrush, shampoo, hardback, and toothpaste. Place the backpack on the bed or on the floor.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_80'}
+{'action': 'OPEN', 'object': 'fridge_97'}
+{'action': 'CLOSE', 'object': 'fridge_97'}
+cleaning_up_refrigerator_0_Wainscott_0_int_1_2021-06-23_17-46-01
+Use the rag and soap to clean the trays, the bowl, and the refrigerator. When you are done, leave the rag and bowl next to the sink, the soap in the sink, and the trays in the refrigerator.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_80'}
+{'action': 'OPEN', 'object': 'fridge_97'}
+{'action': 'CLOSE', 'object': 'fridge_97'}
+making_tea_0_Wainscott_0_int_0_2021-10-26_12-49-48
+Slice the lemon, heat the tea on the stove.
+--------------------
+{'action': 'OPEN', 'object': 'backpack_108'}
+organizing_school_stuff_0_Wainscott_1_int_0_2021-08-24_22-56-24
+Place the folder, highlighter, pencil, pen, and calculator into the backpack, then leave the backpack on the bed.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_28'}
+{'action': 'OPEN', 'object': 'bottom_cabinet_25'}
+{'action': 'OPEN', 'object': 'bottom_cabinet_24'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_24'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_28'}
+{'action': 'CLOSE', 'object': 'bottom_cabinet_25'}
+cleaning_cupboards_0_Wainscott_1_int_1_2021-08-25_16-40-44
+Clean dusty cabinets, remove all books from the cabinets, put the screwdriver in the bin, put all markers and pens in the bucket.
+--------------------
+{'action': 'OPEN', 'object': 'fridge_61'}
+{'action': 'OPEN', 'object': 'top_cabinet_62'}
+{'action': 'CLOSE', 'object': 'fridge_61'}
+packing_food_for_work_0_Ihlen_1_int_0_2021-06-08_19-36-15
+Pack a sandwich, an apple, a snack food, and a juice into a carton, and place the carton on the floor or on the countertop.
+--------------------
+{'action': 'OPEN', 'object': 'bottom_cabinet_no_top_54'}
+{'action': 'OPEN', 'object': 'fridge_57'}
+{'action': 'CLOSE', 'object': 'fridge_57'}
+storing_the_groceries_0_Beechwood_0_int_0_2021-10-26_13-13-47
+Store the groceries into the fridge and the cabinet based on your common sense. Place groceries of the same type next to each other.
+--------------------
+
+
+
+
+
+
+
+
+
+------------------------ TOGGLE_ON & TOGGLE_OFF ----------------------------------------
+
+{'action': 'TOGGLE_ON', 'object': 'sink_28'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_28'}
+mopping_floors_0_Benevolence_2_int_0_2021-10-25_21-01-58
+Use the bucket, soap and broom to clean the stained floor, when you are done, leave the soap in the bucket and place the bucket and broom next to the sink.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_37'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_37'}
+cleaning_freezer_0_Pomaria_1_int_0_2021-10-26_12-59-25
+Clean the stained freezer and remove all food items from the freezer.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'modem_0'}
+installing_a_modem_0_Beechwood_0_int_0_2021-10-25_20-28-55
+Place the modem under the table and make sure it is turned on.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'dishwasher_83'}
+{'action': 'TOGGLE_OFF', 'object': 'dishwasher_83'}
+cleaning_up_after_a_meal_0_Wainscott_0_int_0_2021-10-20_05-33-24
+Clean all the stained tableware, put all hamburgers into sack1 which is on the floor, and clean the stained floor, chair, and table.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_18'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_18'}
+cleaning_shoes_0_Pomaria_2_int_0_2021-09-11_13-59-22
+Clean all the shoes, and leave the towel on the floor.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_37'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_37'}
+cleaning_sneakers_0_Pomaria_1_int_0_2021-10-26_13-36-08
+Place the towel on the countertop, the brush next to the towel, and the soap into the sink. Clean the dusty and stained sneakers, place 2 sneakers next to the table and 2 other sneakers under the table.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_32'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_32'}
+washing_cars_or_other_vehicles_0_Ihlen_0_int_0_2021-10-25_22-38-10
+Wash all dust and stains from the car or vehicle.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_19'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_19'}
+washing_dishes_0_Benevolence_1_int_0_2021-06-08_18-07-48
+Wash all the stained plates, cups, and bowls.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_49'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_49'}
+washing_floor_0_Ihlen_1_int_1_2021-10-26_14-53-28
+Clean the dust and stain off the floor.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_7'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_7'}
+cleaning_bathrooms_0_Benevolence_0_int_1_2021-06-12_19-33-28
+Use the rag and bucket to clean stains off the toilet, the bathtub, the sink, and the floor.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_37'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_37'}
+cleaning_kitchen_cupboard_0_Pomaria_1_int_0_2021-10-26_13-05-36
+Clean all dusty cabinets, put all bowls in one cabinet and all cups in another.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_38'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_38'}
+preparing_a_shower_for_child_0_Ihlen_0_int_0_2021-10-25_21-36-25
+Place the towel, shampoo, and soap on the floor near the sink for the child's shower.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_82'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_82'}
+cleaning_stove_0_Wainscott_0_int_0_2021-09-11_12-51-07
+Use the rag and dishtowel to clean the dusty and stained stove, then leave them next to the sink.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_51'}
+cleaning_carpets_0_Wainscott_1_int_0_2021-09-11_01-12-41
+Clean the stained carpets.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_67'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_67'}
+polishing_shoes_0_Wainscott_0_int_0_2021-06-10_21-28-31
+Soak the rag, polish both shoes, and place the rag next to the sink.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_64'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_64'}
+defrosting_freezer_0_Beechwood_0_int_0_2021-10-25_23-10-43
+Place the receptacle next to the refrigerator, the bucket next to the countertop, the scraper on top of the refrigerator, the towel on the countertop, the soaked rag inside the sink, and all the food inside the bucket.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'scanner_0'}
+installing_a_scanner_0_Pomaria_0_int_0_2021-06-08_18-34-59
+Turn on the scanner and place it under the table.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'facsimile_0'}
+installing_a_fax_machine_0_Beechwood_0_int_0_2021-10-25_20-22-22
+Place the fax machine on the table and turn it on.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_19'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_19'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_19'}
+cleaning_oven_0_Benevolence_1_int_0_2021-09-11_12-20-40
+Clean the oven using wet rags and scrub brushes.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_48'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_48'}
+cleaning_toilet_0_Merom_0_int_1_2021-06-23_17-35-48
+Use the scrub brush and detergent to clean the stained toilet, and leave them on the floor when finished.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_53'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_53'}
+cleaning_table_after_clearing_0_Merom_1_int_0_2021-06-06_19-48-44
+Clean the table after clearing it.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_32'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_32'}
+cleaning_barbecue_grill_0_Ihlen_0_int_0_2021-09-10_16-02-39
+Clean stains and dust off of the barbecue grill.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_38'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_38'}
+cleaning_the_hot_tub_0_Ihlen_0_int_0_2021-08-24_22-19-07
+Clean the stained hot tub located on floor1.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_48'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_48'}
+cleaning_floors_0_Merom_0_int_1_2021-06-23_16-12-28
+Clean dust and stains off the floors.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_19'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_19'}
+cleaning_microwave_oven_0_Benevolence_1_int_0_2021-09-11_01-27-10
+Clean the microwave oven.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_37'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_37'}
+cleaning_up_the_kitchen_only_0_Pomaria_1_int_0_2021-10-26_00-50-16
+Use the soap and rags to clean the plates, cabinets and floor, then leave the soap and rags near the sink. Place the blender on the countertop, store vegetable oil in one cabinet and plates in another cabinet, and put the fuits and vegetables in the fridge.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_82'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_82'}
+cleaning_windows_0_Wainscott_0_int_0_2021-05-23_23-07-05
+Soak the rags and use them to clean the dusty windows.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_37'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_37'}
+washing_pots_and_pans_0_Pomaria_1_int_0_2021-10-26_13-06-44
+Clean all the stained pans, kettles, and teapots and place them inside a cabinet.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_32'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_32'}
+cleaning_garage_0_Ihlen_0_int_0_2021-08-24_17-40-48
+Clean dust and stains off the floor and cabinet, put all newspapers into the bin or on the floor, and put all bottles on the table.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_64'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_64'}
+watering_houseplants_0_Beechwood_0_int_0_2021-10-26_15-20-01
+Water each houseplant thoroughly.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'alarm_0'}
+{'action': 'TOGGLE_ON', 'object': 'alarm_1'}
+installing_alarms_0_Merom_1_int_0_2021-05-23_23-02-24
+Place each alarm on a table and make sure they are turned on.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_38'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_38'}
+cleaning_bathtub_0_Pomaria_0_int_0_2021-09-10_16-22-10
+Clean the stained bathtub.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_32'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_32'}
+cleaning_the_pool_0_Ihlen_0_int_0_2021-06-01_15-30-31
+Clean the stained pool on the floor using the scrub brush and the detergent, when you are done leave the brush on top of the shelf, and the detergent on the floor.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'sink_82'}
+{'action': 'TOGGLE_OFF', 'object': 'sink_82'}
+cleaning_up_refrigerator_0_Wainscott_0_int_1_2021-06-23_17-46-01
+Use the rag and soap to clean the trays, the bowl, and the refrigerator. When you are done, leave the rag and bowl next to the sink, the soap in the sink, and the trays in the refrigerator.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'stove_88'}
+making_tea_0_Wainscott_0_int_0_2021-10-26_12-49-48
+Slice the lemon, heat the tea on the stove.
+--------------------
+{'action': 'TOGGLE_ON', 'object': 'printer_0'}
+installing_a_printer_0_Pomaria_0_int_0_2021-06-08_18-33-07
+Place the printer on the table and turn it on.
+--------------------
+
+
+
+------------------------------------------- knife ------------------------------------------
+{'action': 'RIGHT_GRASP', 'object': 'carving_knife_66'}
+{'action': 'RIGHT_REALEASE', 'object': 'carving_knife_66'}
+preserving_food_0_Rs_int_0_2021-08-25_15-53-33
+Slice and cook all the strawberries, then seal them inside the jar, remember to freeze the beef.
+
+--------------------
+{'action': 'RIGHT_GRASP', 'object': 'carving_knife_86'}
+preparing_salad_0_Pomaria_1_int_1_2021-10-26_14-17-24
+Place a whole lettuce, a sliced apple, a sliced tomato, and a whole radish on separate plates.
+
+--------------------
+{'action': 'RIGHT_GRASP', 'object': 'table_knife_0'}
+{'action': 'LEFT_GRASP', 'object': 'carving_knife_0'}
+serving_a_meal_0_Merom_1_int_0_2021-10-26_00-34-17
+Serve the meal by placing all food and drinks on the table along with the appropriate utensils.
+
+--------------------
+{'action': 'RIGHT_GRASP', 'object': 'carving_knife_69'}
+chopping_vegetables_0_Rs_int_0_2021-05-25_22-01-16
+Slice all the vegetables, and put all sliced vegetable into dishes.
+
+--------------------
+{'action': 'LEFT_GRASP', 'object': 'carving_knife_0'}
+{'action': 'LEFT_RELEASE', 'object': 'carving_knife_0'}
+bottling_fruit_0_Wainscott_0_int_0_2021-05-24_19-46-46
+Slice the strawberry and the peach, put the sliced strawberry and peach in separate jars, and close the jars.
+
+
+
+--------------------
+{'action': 'UNFREEZE', 'object': 'carving_knife_0'}
+{'action': 'LEFT_GRASP', 'object': 'carving_knife_0'}
+making_tea_0_Wainscott_0_int_0_2021-10-26_12-49-48
+Slice the lemon, heat the tea on the stove.
+--------------------
+
+
+
+
+
+
+
+
+
+

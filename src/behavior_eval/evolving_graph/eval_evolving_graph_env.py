@@ -59,6 +59,7 @@ class EvalGraphEnv(BaseEnv):
             super().__init__(config, demo_name,**kwargs)
             self.env = iGibsonEnv(config_file=self.config,**kwargs)
             self.task=self.env.task
+        self.demo_name = demo_name
         self.get_relevant_objects()
         self.action_env=EvolvingGraph(self.addressable_objects)
         self.control_function={

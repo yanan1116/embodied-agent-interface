@@ -154,6 +154,7 @@ def traj_eval_stats(eval_stat_path):
                         wrong_temporal_order_errors += 1
     tot_num = len(stats)
     traj_stats = {
+        "tot_num": tot_num,
         "execution_success_rate": round(executable_num/tot_num, 4) if tot_num > 0 else 0,
         "grammar_error": {
             "parsing": round(parse_errors/tot_num, 4) if tot_num > 0 else 0,
@@ -222,6 +223,9 @@ def goal_eval_stats(eval_stat_path):
     edge_goal_success_rate = (satisfied_edges / tot_edge_goals)
     overall_goal_success_rate = ((satified_goals) / tot_num)
     goal_stats = {
+        "tot_num": tot_num,
+        "tot_node_goals": tot_node_goals,
+        "tot_edge_goals": tot_edge_goals,
         "task_success_rate": round(num_success/len(stats), 4) if len(stats) > 0 else 0,
         "state_goal": round(node_goal_success_rate, 4) if tot_node_goals > 0 else 0,
         "relation_goal": round(edge_goal_success_rate, 4) if tot_edge_goals > 0 else 0,

@@ -24,21 +24,20 @@ def agent_evaluation(
     num_workers: number of workers for multiprocessing
     llm_response_dir: directory containing llm responses (helm outputs)
     output_dir: directory to store results
-    output_dir: directory to store results
     """
-    output_dir_for_tm=output_dir
-    output_dir = os.path.join(output_dir, 'behavior',mode, eval_type)
-    os.makedirs(output_dir,exist_ok=True)
-    if mode=="evaluate_results":
-        if llm_response_path is None:
-            print(f"did not provide llm_response_path, set to default: {eai_eval.helm_output_path}")
-            llm_response_path=eai_eval.helm_output_path
+    # output_dir_for_tm=output_dir
+    # output_dir = os.path.join(output_dir, 'behavior',mode, eval_type)
+    # os.makedirs(output_dir,exist_ok=True)
+    # if mode=="evaluate_results":
+    #     if llm_response_path is None:
+    #         print(f"did not provide llm_response_path, set to default: {eai_eval.helm_output_path}")
+    #         llm_response_path=eai_eval.helm_output_path
         
         
-        llm_response_path_eval_type=os.path.join(llm_response_path,'behavior',eval_type)
-        if os.path.exists(llm_response_path_eval_type) is False:
-            print(f"Error: eval-type dir {llm_response_path_eval_type} under {llm_response_path} does not exist")
-            print("Please run python -m eagent_eval.utils.download_utils to download the data \n or provide the correct path")
+    #     llm_response_path_eval_type=os.path.join(llm_response_path,'behavior',eval_type)
+    #     if os.path.exists(llm_response_path_eval_type) is False:
+    #         print(f"Error: eval-type dir {llm_response_path_eval_type} under {llm_response_path} does not exist")
+    #         print("Please run python -m eagent_eval.utils.download_utils to download the data \n or provide the correct path")
             
             
             
@@ -51,17 +50,17 @@ def agent_evaluation(
         
     if eval_type == "action_sequencing":
         if mode == "evaluate_results":
-            action_sequence_evaluate_results(llm_response_path_eval_type,num_workers,output_dir)
+            action_sequence_evaluate_results(llm_response_path, num_workers,output_dir)
         elif mode == "generate_prompts":
             action_sequence_generate_prompts(num_workers,output_dir)
     elif eval_type == "goal_interpretation":
         if mode == "evaluate_results":
-            goal_interpretation_evaluate_results(llm_response_path_eval_type, output_dir)
+            goal_interpretation_evaluate_results(llm_response_path, output_dir)
         elif mode == "generate_prompts":
             goal_interpretation_generate_prompts(output_dir)
     elif eval_type == "subgoal_decomposition":
         if mode == "evaluate_results":
-            subgoal_decomposition_evaluate_results(llm_response_path_eval_type, num_workers, output_dir)
+            subgoal_decomposition_evaluate_results(llm_response_path, num_workers, output_dir)
         elif mode == "generate_prompts":
             subgoal_decomposition_generate_prompts(num_workers, output_dir)
     elif eval_type == "transition_modeling":

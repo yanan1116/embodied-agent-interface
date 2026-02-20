@@ -1,4 +1,4 @@
-import gym
+import gym,sys
 import numpy as np
 from igibson.robots import BaseRobot,BehaviorRobot
 from igibson.scenes.igibson_indoor_scene import InteractiveIndoorScene
@@ -30,9 +30,11 @@ class ActionEnv:
         self.position_geometry=PositionGeometry(self.robot,simulator,using_kinematics)
         self.openable_objects = {obj:obj.states[object_states.Open].get_value() 
                                  for obj in self.addressable_objects if object_states.Open in obj.states}
-
+        print('openable_objects:')
+        for j, s in self.openable_objects.items():
+            print('\t', j.name, s) 
     ##################### helper functions #####################
-
+ 
     def get_all_inhand_objects(self,hand):
         inhand_objects=[]
         def traverse(node):
@@ -46,7 +48,8 @@ class ActionEnv:
         return set(inhand_objects)
     
     def navigate_to_if_needed(self,obj:URDFObject):
-        if not obj.states[object_states.InReachOfRobot].get_value():
+        if not obj.states[object_states.InReachOfRobot].get_value(): # iGibson/igibson/object_states/robot_related_states.py
+            # print(f"{obj.name} is currently out of reach robot, so navigate to the object")
             self.navigate_to(obj)
 
     def teleport_relation(self,obj1:URDFObject):
@@ -58,12 +61,13 @@ class ActionEnv:
         def recursive_teleport(node):
             for child in node.children.values():
                 flag=teleport_func[child.teleport_type](child.obj,node.obj)
-                print(f"Teleport {child.obj.name} {child.teleport_type.name} {node.obj.name} successful: {flag}")
+                print(f"Teleport--> {child.obj.name} {child.teleport_type.name} {node.obj.name} successful: {flag}")
                 recursive_teleport(child)
         recursive_teleport(obj_node)
 
     def teleport_all(self):
         for obj in self.openable_objects.keys():
+            print('Teleport-->', obj.name, self.openable_objects[obj])
             obj.states[object_states.Open].set_value(self.openable_objects[obj],fully=True)
         self.simulator.step()
         for obj in self.relation_tree.root.children.keys():
@@ -90,6 +94,7 @@ class ActionEnv:
         ## currently do auto navigation, no need for pre conditions
         ## post effects
         if obj.states[object_states.InReachOfRobot].get_value():
+            print(obj.name, 'is already in reach of robot')
             return True
         
         if isinstance(obj,RoomFloor):
@@ -102,8 +107,11 @@ class ActionEnv:
                 self.teleport_relation(invent_obj)
 
         if obj.states[object_states.InReachOfRobot].get_value():
-            print(f"navigated to {obj.name}, InReachOfRobot: {obj.states[object_states.InReachOfRobot].get_value()}")
+            print(f"navigation to {obj.name}, InReachOfRobot: {obj.states[object_states.InReachOfRobot].get_value()}")
             return True
+        # else:
+        #     print(f'navigation to {obj.name} failed')
+        #     return False
         
     def grasp(self,obj:URDFObject,hand:str):
         ## pre conditions
@@ -457,13 +465,24 @@ class ActionEnv:
             print(f"{obj.name} cannot be {open_close}ed")
             return False
         
-        if self.openable_objects[obj]==(open_close=='open'):
+        # if self.openable_objects[obj]==(open_close=='open'):
+        #     print(f"{obj.name} is already {open_close}ed")
+        #     return False
+
+        if open_close=='open' and self.openable_objects[obj]:
             print(f"{obj.name} is already {open_close}ed")
-            return False
-        
+            return False            
+
+        if open_close=='close' and not self.openable_objects[obj]:
+            print(f"{obj.name} is already {open_close}d")
+            return False   
+               
         if None not in self.robot_inventory.values():
             print(f"Both hands full, release one object first to {open_close} the object")
             return False
+
+        if object_states.ToggledOn in obj.states:
+            print('ToggledOn is in states')
 
         # can't open if toggled on
         if open_close=='open' and object_states.ToggledOn in obj.states and obj.states[object_states.ToggledOn].get_value():
@@ -472,7 +491,15 @@ class ActionEnv:
 
         ## post effects
         self.navigate_to_if_needed(obj)
-        flag=obj.states[object_states.Open].set_value((open_close=='open'),fully=True)
+
+        # print('operation:', open_close, '===>', obj.name)
+        #iGibson/igibson/object_states/open.py
+        if open_close == 'open':
+            obj.states[object_states.Open].set_value(True)
+        elif open_close == 'close':
+            obj.states[object_states.Open].set_value(False)
+
+ 
         self.openable_objects[obj]=(open_close=='open')
         if obj.states[object_states.Open].get_value()==(open_close=='open'):
             print(f"{open_close.capitalize()} {obj.name} success")
@@ -511,6 +538,12 @@ class ActionEnv:
         self.navigate_to_if_needed(obj)
         
         obj.states[object_states.ToggledOn].set_value((on_off=='on'))
+        if on_off=='on':
+            assert obj.states[object_states.ToggledOn].get_value()
+        elif on_off=='off':
+            assert not obj.states[object_states.ToggledOn].get_value()
+
+        # print('value_check:',obj.name, on_off,  obj.states[object_states.ToggledOn].get_value())
         print(f"Toggle{on_off} {obj.name} success")
 
 
@@ -558,6 +591,7 @@ class ActionEnv:
         ## post effects
         self.navigate_to_if_needed(obj)
         obj.states[object_states.Sliced].set_value(True)
+        assert obj.states[object_states.Sliced].get_value()
         print(f"Slice {obj.name} success")
 
         obj_parts=[add_obj for add_obj in self.addressable_objects if 'part' in add_obj.name and obj.name in add_obj.name]
@@ -625,6 +659,7 @@ class ActionEnv:
         ## post effects
         self.navigate_to_if_needed(obj)
         obj.states[object_states.Dusty].set_value(False)
+        assert not obj.states[object_states.Dusty].get_value()
         print(f"Clean-dust {obj.name} success")
         return True
     
@@ -738,10 +773,12 @@ class ActionEnv:
         return True
     
     def freeze_unfreeze(self,obj,freeze_or_unfreeze:str):
-        assert freeze_or_unfreeze in ['freeze','unfreeze']
+        print('freeze_or_unfreeze==>', freeze_or_unfreeze)
         ## pre conditions
         try:
+            print('freeze_unfreeze check_interactability')
             self.check_interactability(obj)
+            print('check_interactability success')
         except ValueError as e:
             print(e)
             return False

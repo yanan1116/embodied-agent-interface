@@ -1,6 +1,6 @@
-from behavior_eval.evaluation.action_sequencing.resources.prompt_templates.one_shot import prompt
+from behavior_eval.evaluation.action_sequencing.resources.prompt_templates.one_shot import *
 import numpy as np
-from behavior_eval.evaluation.action_sequencing.action_sequence_evaluator import ActionSequenceEvaluator
+# from behavior_eval.evaluation.action_sequencing.action_sequence_evaluator import ActionSequenceEvaluator
 import openai
 import os
 import json
@@ -56,6 +56,43 @@ def convert_state_dict_to_string(statedict):
     result = '\n'.join(output_lines)
     return result
 
+
+def convert2nl(line):
+    expand_dic = {'inlefthandofrobot': 'in the left hand of the robot', 
+                  'inhandofrobot': 'in the hand of robot',
+                  'inrighthandofrobot': 'in the right hand of the robot',
+                  'nextto': 'next to',
+                  'toggledon': 'toggled on',
+                  'toggledoff': 'toggled off'}
+    for k, v in expand_dic.items():
+        if k in line:
+            line = line.replace(k, v)
+    return line 
+
+def convert_state_dict_to_natural_language(statedict):
+    output_lines = []
+
+    # Convert nodes to predicates based on properties and states
+    for node_name, node_info in statedict['nodes'].items():
+        properties = node_info.get('properties', set())
+        states = node_info.get('states', set())
+
+        # For each property, check if it's in states or not
+        for prop in properties:
+            if prop in states:
+                line = f"{node_name} is {prop}"
+            else:
+                line = f"{node_name} is not {prop}"
+            output_lines.append(convert2nl(line).replace("'", ""))
+
+    # Convert edges to binary predicates
+    for relation in statedict['edges']:
+        line = f"'{relation['from_name']}' is '{relation['relation']}' '{relation['to_name']}'"
+        output_lines.append(convert2nl(line).replace("'", ""))
+
+    return output_lines
+
+
 def replanning_eval_once(ase,fail_prob=0.2):
     state_dict=ase.evolving_graph.action_env.cur_state.get_state_dict(ase.task)
     initial_state = convert_state_dict_to_string(state_dict)
@@ -89,18 +126,18 @@ def replanning_eval_once(ase,fail_prob=0.2):
             return False
     return True
 
-def replanning_eval(demo_name,fail_prob,replan_times):
-    ase=ActionSequenceEvaluator(demo_name=demo_name)
-    for i in range(replan_times+1):
-        flag=replanning_eval_once(ase,fail_prob)
-        if flag:
-            break
-    success=ase.evaluate_graph_success()
-    ase.close()
-    return {
-        'execution_success':flag,
-        'goal_satisfied':success
-    }
+# def replanning_eval(demo_name,fail_prob,replan_times):
+#     ase=ActionSequenceEvaluator(demo_name=demo_name)
+#     for i in range(replan_times+1):
+#         flag=replanning_eval_once(ase,fail_prob)
+#         if flag:
+#             break
+#     success=ase.evaluate_graph_success()
+#     ase.close()
+#     return {
+#         'execution_success':flag,
+#         'goal_satisfied':success
+#     }
 
 def main(seed=0,fail_prob=0.1,eval_num=20,replan_times=3,save_path='./replan_eval'):
     os.makedirs(save_path,exist_ok=True)

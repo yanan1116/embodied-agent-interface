@@ -1,7 +1,7 @@
 import igibson.object_states as object_states
 import json
 import behavior_eval
-import os
+import os,sys
 import re
 
 
@@ -511,86 +511,100 @@ def evaluate_results(llm_response_dir, result_dir):
         
         
     DATA = goal_interpretation_data()
-    DATA.all_models = extract_model_names(llm_response_dir)
+    # DATA.all_models = extract_model_names(llm_response_dir)
 
     ALL_RESULTS = {}
 
-    for model_name in DATA.all_models:
+    # for model_name in DATA.all_models:
         
-        # save_path = f"{llm_response_dir}/{model_name}_outputs.json"
-        try:
-            save_path = [i for i in os.listdir(llm_response_dir) if model_name in i][0]
-            save_path=os.path.join(llm_response_dir, save_path)
-            assert save_path.endswith(".json")
-        except:
-            print(f"Error: {model_name} does not have a corresponding json output file in {llm_response_dir}")
-            exit(1)
+    #     # save_path = f"{llm_response_dir}/{model_name}_outputs.json"
+    #     try:
+    #         save_path = [i for i in os.listdir(llm_response_dir) if model_name in i][0]
+    #         save_path=os.path.join(llm_response_dir, save_path)
+    #         assert save_path.endswith(".json")
+    #     except:
+    #         print(f"Error: {model_name} does not have a corresponding json output file in {llm_response_dir}")
+    #         exit(1)
         
-        with open(save_path, 'r') as json_file:
-            raw_llm_outputs = json.load(json_file)
+    with open(llm_response_dir, 'r') as json_file:
+        raw_llm_outputs = json.load(json_file)
+    
 
-        llm_results_list = {}
-        error_cases = []
 
-        for item in raw_llm_outputs:
-            
-            # parse the raw llm output and save it to the llm_results_list
-            parsed_output, error_message = parse_json(item["llm_output"], model_name)
-            llm_results_list[item["identifier"]] = parsed_output
-            
-            # if error message is not None, save the error case
-            if error_message:
-                error_cases.append({
-                    "identifier": item["identifier"],
-                    "output": item["llm_output"],
-                    "error_message": error_message
-                })
+    llm_results_list = {}
+    error_cases = []
+
+    for item in raw_llm_outputs:
         
-        if error_cases != []:
-            parsing_errors_save_path = f"{result_dir}/log/parsing_errors/{model_name}_non_parsable_outputs.json"
-            os.makedirs(os.path.dirname(parsing_errors_save_path), exist_ok=True)
-            with open(parsing_errors_save_path, "w") as file:
-                    json.dump(error_cases, file, indent=4)
-                    
-            # print(f"\n{model_name} made one or more format errors in its raw response, error cases and details are saved to {parsing_errors_save_path} \n")
+        # parse the raw llm output and save it to the llm_results_list
+        parsed_output, error_message = parse_json(item["llm_output"], '')
+        llm_results_list[item["identifier"]] = parsed_output
+        
+        # if error message is not None, save the error case
+        if error_message:
+            error_cases.append({
+                "identifier": item["identifier"],
+                "output": item["llm_output"],
+                "error_message": error_message
+            })
+    
+    print(len(llm_results_list))
+    # print(llm_results_list.keys())
+    # sys.exit()
+    # if error_cases != []:
+    #     parsing_errors_save_path = f"{result_dir}/log/parsing_errors/{model_name}_non_parsable_outputs.json"
+    #     os.makedirs(os.path.dirname(parsing_errors_save_path), exist_ok=True)
+    #     with open(parsing_errors_save_path, "w") as file:
+    #             json.dump(error_cases, file, indent=4)
+                
+        # print(f"\n{model_name} made one or more format errors in its raw response, error cases and details are saved to {parsing_errors_save_path} \n")
 
-        ALL_RESULTS[model_name] = llm_results_list
+    # ALL_RESULTS[model_name] = llm_results_list
 
     
-    ALL_METRICS = {}
+    # ALL_METRICS = {}
 
-    for model_name in DATA.all_models:
-        model_results = ALL_RESULTS[model_name]
-        
-        result_reference_list = []
-        for demo in DATA.demo_names:
-            goal_conds = DATA.demo_to_conds[demo]['goal_conditions']
-            model_pred = model_results[demo]
-            result_reference_list.append(
-                {   
-                    "identifier": demo,
-                    "llm_output": model_pred,
-                    "reference": goal_conds,
-                }
-            )    
-        
-        
-        ALL_METRICS[model_name], sorted_model_results_evaluated = evaluate_dataset(result_reference_list, DATA)
-        
-        performance_scores_save_path = f"{result_dir}/summary/{model_name}_performance_scores.json"
-        os.makedirs(os.path.dirname(performance_scores_save_path), exist_ok=True)
-        with open(performance_scores_save_path, 'w') as json_file:
-            json.dump(ALL_METRICS[model_name], json_file, indent=4)
-        
-        
-        error_analysis_save_path = f"{result_dir}/log/detailed_analyses/{model_name}_detailed_analysis.json"
-        os.makedirs(os.path.dirname(error_analysis_save_path), exist_ok=True)
-        with open(error_analysis_save_path, 'w') as json_file:
-            json.dump(sorted_model_results_evaluated, json_file, indent=4)
+    # for model_name in DATA.all_models:
+    # model_results = ALL_RESULTS[model_name]
     
-    print("\n--------------------------------------------------------------------------------------")
-    print(f"* If LMs have format issues, see details -> {result_dir}/log/parsing_errors/\n")
-    print(f"* Detailed sample error analyses -> {result_dir}/log/detailed_analyses/\n")
-    print(f"* Final model performance scores -> {result_dir}/summary/")
-    print("--------------------------------------------------------------------------------------")
-    print(f"Success! All models have been evaluated.")
+    result_reference_list = []
+    for demo in DATA.demo_names:
+        
+        goal_conds = DATA.demo_to_conds[demo]['goal_conditions']
+
+        if demo not in llm_results_list.keys():
+            print('demo:', demo)
+            continue
+        model_pred = llm_results_list[demo]
+        result_reference_list.append(
+            {   
+                "identifier": demo,
+                "llm_output": model_pred,
+                "reference": goal_conds,
+            }
+        )    
+    
+    
+    # ALL_METRICS[model_name], sorted_model_results_evaluated = evaluate_dataset(result_reference_list, DATA)
+    summary, sorted_model_results_evaluated = evaluate_dataset(result_reference_list, DATA)
+    print(f'summaryyy:', len(result_reference_list))
+    print(json.dumps(summary, indent=2))
+    # print(json.dumps(sorted_model_results_evaluated, indent=2))
+
+    # performance_scores_save_path = f"{result_dir}/summary/{model_name}_performance_scores.json"
+    # os.makedirs(os.path.dirname(performance_scores_save_path), exist_ok=True)
+    # with open(performance_scores_save_path, 'w') as json_file:
+    #     json.dump(ALL_METRICS[model_name], json_file, indent=4)
+    
+    
+    # error_analysis_save_path = f"{result_dir}/log/detailed_analyses/{model_name}_detailed_analysis.json"
+    # os.makedirs(os.path.dirname(error_analysis_save_path), exist_ok=True)
+    # with open(error_analysis_save_path, 'w') as json_file:
+    #     json.dump(sorted_model_results_evaluated, json_file, indent=4)
+
+    # print("\n--------------------------------------------------------------------------------------")
+    # print(f"* If LMs have format issues, see details -> {result_dir}/log/parsing_errors/\n")
+    # print(f"* Detailed sample error analyses -> {result_dir}/log/detailed_analyses/\n")
+    # print(f"* Final model performance scores -> {result_dir}/summary/")
+    # print("--------------------------------------------------------------------------------------")
+    # print(f"Success! All models have been evaluated.")

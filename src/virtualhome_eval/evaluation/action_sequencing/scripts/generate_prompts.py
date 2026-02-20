@@ -8,6 +8,14 @@ import virtualhome_eval.evaluation.action_sequencing.prompts.one_shot as one_sho
 import logging
 logger = logging.getLogger(__name__)
 
+import datasets
+ds = datasets.load_dataset('Inevitablevalor/EmbodiedAgentInterface')
+
+dsdic = {}
+for ii in ds['virtualhome']:
+    dsdic[ii['task_name']+'/'+ii['task_id']] = {'natural_language_description': ii['natural_language_description'],
+                                                'action_trajectory': ii['action_trajectory']}
+
 def generate_prompts(args):
     dataset = args.dataset
     output_dir = args.output_dir
@@ -17,7 +25,7 @@ def generate_prompts(args):
     )
     task_dict_dir = osp.join(resource_root, "task_state_LTL_formula_accurate.json")
     evaluation_dir = args.evaluation_dir
-    helm_prompt_path = osp.join(output_dir, "helm_prompt.json")
+    helm_prompt_path = osp.join(output_dir, "prompts.json")
     scenegraph_id = args.scene_id
     scene_id = f"scene_{scenegraph_id}"
     task_dict = json.load(open(task_dict_dir, "r"))
@@ -29,10 +37,18 @@ def generate_prompts(args):
     name_equivalence = utils.load_name_equivalence()
 
     helm_prompt_list = []
-
+    # src/virtualhome_eval/resources/virtualhome/task_state_LTL_formula_accurate.json
     for task_name, task_dicts in task_dict.items():
         logger.info(f"CURRENT TASK IS {task_name}!")
         for file_id, task_goal_dict in task_dicts.items():
+            try:
+                ii = dsdic[f"{task_name.strip()}/{file_id}"]
+            except:
+                print('missing:', f"{task_name.strip()}/{file_id}")
+                continue
+            # print(ii['natural_language_description'])
+            # print(ii['action_trajectory'])
+            # print()
             # get symbolic goals
             goals = task_goal_dict["vh_goal"]
             action_goals = goals["actions"]
@@ -84,5 +100,6 @@ def generate_prompts(args):
             )
 
     # save helm_prompt_list
-    json.dump(helm_prompt_list, open(helm_prompt_path, "w"), indent=4)
+    if output_dir:
+        json.dump(helm_prompt_list, open(helm_prompt_path, "w"), indent=4)
     return helm_prompt_path
