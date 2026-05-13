@@ -123,9 +123,9 @@ python src/behavior_eval/evaluation/action_sequencing/scripts/evaluate_results.p
 
 
 
-<!-- # BibTex
+# Citation
 
-If you find our work helpful, please consider citing it:
+If you find this work helpful, please consider citing it:
 
 ```bash
 @inproceedings{sadhu2025vestabench,
@@ -134,4 +134,8 @@ If you find our work helpful, please consider citing it:
   booktitle={Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing: Industry Track},
   year={2025}
 }
-``` -->
+```
+
+# License
+
+This project is released under the [MIT License](LICENSE).
