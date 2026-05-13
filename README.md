@@ -127,7 +127,7 @@ python src/behavior_eval/evaluation/action_sequencing/scripts/evaluate_results.p
 
 If you find this work helpful, please consider citing it:
 
-```bash
+```bibtex
 @inproceedings{sadhu2025vestabench,
   title={VESTABENCH: An Embodied Benchmark for Safe Long-Horizon Planning Under Multi-Constraint and Adversarial Settings},
   author={Sadhu, Tanmana and Chen, Yanan and Pesaranghader, Ali},
